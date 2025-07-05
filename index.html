@@ -1,40 +1,128 @@
-<script>
-    async function predictOutcome() {
-        const age = parseFloat(document.getElementById('age').value);
-        const ddimer = parseFloat(document.getElementById('ddimer').value);
-        const crp = parseFloat(document.getElementById('crp').value);
-        const ferritin = parseFloat(document.getElementById('ferritin').value);
-        const oxygen = parseFloat(document.getElementById('oxygen').value);
-
-        const inputData = {
-            age: age,
-            ddimer: ddimer,
-            crp: crp,
-            ferritin: ferritin,
-            oxygen: oxygen
-        };
-
-        try {
-            const response = await fetch('https://covidalarm.onrender.com/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(inputData)
-            });
-
-            const result = await response.json();
-
-            if (result.prediction !== undefined) {
-                document.getElementById('result').innerText = 
-                  result.prediction === 1 ? "⚠️ High Risk (Death)" : "✅ Safe (Discharge)";
-            } else {
-                document.getElementById('result').innerText = "❌ Prediction failed: " + result.error;
-                console.error("Error:", result.error);
-            }
-        } catch (error) {
-            console.error("Fetch failed:", error);
-            document.getElementById('result').innerText = "❌ Network or server error";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COVID Outcome Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
         }
-    }
-</script>
+
+        h1 {
+            color: #333;
+        }
+
+        .form-group {
+            margin: 10px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 8px;
+            width: 250px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #111;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>COVID Outcome Predictor</h1>
+
+    <div class="form-group">
+        <label for="age">Age (years)</label>
+        <input type="number" id="age" step="any">
+    </div>
+
+    <div class="form-group">
+        <label for="ddimer">D-Dimer (mg/L)</label>
+        <input type="number" id="ddimer" step="any">
+    </div>
+
+    <div class="form-group">
+        <label for="crp">CRP (mg/dL)</label>
+        <input type="number" id="crp" step="any">
+    </div>
+
+    <div class="form-group">
+        <label for="ferritin">Ferritin (ng/mL)</label>
+        <input type="number" id="ferritin" step="any">
+    </div>
+
+    <div class="form-group">
+        <label for="oxygen">Oxygen Saturation (%)</label>
+        <input type="number" id="oxygen" step="any">
+    </div>
+
+    <button onclick="predictOutcome()">Predict</button>
+
+    <p id="result"></p>
+
+    <script>
+        async function predictOutcome() {
+            const age = parseFloat(document.getElementById('age').value);
+            const ddimer = parseFloat(document.getElementById('ddimer').value);
+            const crp = parseFloat(document.getElementById('crp').value);
+            const ferritin = parseFloat(document.getElementById('ferritin').value);
+            const oxygen = parseFloat(document.getElementById('oxygen').value);
+
+            const inputData = {
+                age: age,
+                ddimer: ddimer,
+                crp: crp,
+                ferritin: ferritin,
+                oxygen: oxygen
+            };
+
+            try {
+                const response = await fetch('https://covidalarm.onrender.com/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(inputData)
+                });
+
+                const result = await response.json();
+
+                if (result.prediction !== undefined) {
+                    document.getElementById('result').innerText =
+                        result.prediction === 1
+                            ? "⚠️ High Risk (Death)"
+                            : "✅ Low Risk (Discharge)";
+                } else {
+                    document.getElementById('result').innerText = "❌ Prediction failed: " + (result.error || "Unknown error");
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                document.getElementById('result').innerText = "❌ Server error or offline";
+            }
+        }
+    </script>
+</body>
+</html>
